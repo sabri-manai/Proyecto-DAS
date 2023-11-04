@@ -1,0 +1,87 @@
+---
+title: "Proyecto - Bitcoin Data Analysis"
+author: "Sabri Manai"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+# Libraries that we will use in this project
+library(ggplot2)
+library(gridExtra)
+library(plotly)
+
+```
+
+### Loading data into a Dataframe.
+```{r echo = FALSE }
+# Loading data
+
+# Setting the working directory to the folder where our data is located
+#setwd("C:\\Users\\Sabri\\Desktop\\UPV2023\\DAS\\proyecto")
+
+# Loading the dataset using read.csv()
+df <- read.csv("bitdata.csv", header=TRUE)
+
+
+# Checking the first few rows of the dataset to verify if it loaded correctly
+head(df)
+```
+
+```{r}
+summary(df) 
+```
+## Data Visualization 
+```{r}
+df$timestamp <- as.POSIXct(df$timestamp)
+
+plot1 <- ggplot(df, aes(x = timestamp, y = close)) +
+  geom_line() +
+  labs(title = "Close Price Over Time",
+       x = "Timestamp",
+       y = "Close Price") +
+  theme_minimal()
+plot2 <- ggplot(df, aes(x = timestamp, y = open)) +
+  geom_line() +
+  labs(title = "Open Price Over Time",
+       x = "Timestamp",
+       y = "Price (USD)") +
+  theme_minimal()
+
+grid.arrange(plot1, plot2, ncol = 2)
+```
+### Same Closing and Openin price over the time is because the Bitcoin market dosen't close.
+
+```{r}
+plot_ly(data = df, x = ~timestamp) %>%
+  add_candlestick(open = ~open, high = ~high, low = ~low, close = ~close) %>%
+  layout(title = "Bitcoin Candlestick Chart", yaxis_title = "Price (USD)")
+
+```
+
+```{r}
+ggplot(df, aes(x = close)) +
+  geom_histogram(binwidth = 1000, fill = "blue", color = "black", alpha = 0.5) +
+  labs(title = "Bitcoin Price Distribution",
+       x = "Price (USD)",
+       y = "Frequency") +
+  theme_minimal()
+  scale_y_continuous(labels = scales::comma_format(scale = 1e-3), breaks = scales::pretty_breaks(n = 10))
+
+```
+
+```{r}
+ggplot(df, aes(x = 1, y = volume)) +
+  geom_violin(fill = "blue", color = "black", alpha = 0.5) +
+  labs(title = "Volume Distribution (Violin Plot)",
+       x = "Volume") +
+  theme_minimal() +
+  scale_x_continuous(labels = NULL, breaks = NULL)
+
+
+```
+
